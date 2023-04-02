@@ -56,21 +56,28 @@ function saveFileToFileSys(req,res)
   return new Promise ((resolve, reject)=> {
 
     console.log("Entering saveFileToFileSys...");
-    var docId = req.body.docId;
-    var docTitle = req.body.docTitle;
-    var fromWFStatus = req.body.fromWFStatus;
-    var toWFStatus = req.body.toWFStatus;
+    var gradClass = req.body.gradClass;
+    var hsCountry = req.body.hsCountry;
+    var hsState = req.body.hsState;
+    var highSchoolIdentifier = req.body.highSchoolIdentifier;
+    var studentIdentifier = req.body.studentIdentifier;
+    var docType = req.body.docType;
+
     var uploadpath;
-    console.log("docId ->" + docId);
-    console.log("docTitle ->" + docTitle);
-    console.log("fromWFStatus ->" + fromWFStatus);
-    console.log("toWFStatus ->" + toWFStatus);
-    
+    console.log("gradClass ->" + gradClass);
+    console.log("hsCountry ->" + hsCountry);
+    console.log("hsState ->" + hsState);
+    console.log("highSchoolIdentifier ->" + highSchoolIdentifier);
+    console.log("studentIdentifier ->" + studentIdentifier);
+    console.log("docType ->" + docType);
+
     let reqContext = {
-      "docId" : docId,
-      "docTitle" : docTitle,
-      "fromWFStatus" : fromWFStatus,
-      "toWFStatus" : toWFStatus,
+      "gradClass" : gradClass,
+      "hsCountry" : hsCountry,
+      "hsState" : hsState,
+      "highSchoolIdentifier" : highSchoolIdentifier,
+      "studentIdentifier" : studentIdentifier,
+      "docType" : docType,
       "fileLocation" : null,
       "fileHash"  : null
     };
@@ -80,7 +87,7 @@ function saveFileToFileSys(req,res)
       var uploadedFileName = uploadedFile.name;
       console.log ("Uploaded File Name:"+uploadedFileName);
   
-      uploadpath = __dirname + '/uploads/' + reqContext.docId+"-"+reqContext.fromWFStatus+"-"+reqContext.toWFStatus+"-"+uploadedFileName;
+      uploadpath = __dirname + '/uploads/' + reqContext.gradClass+"-"+reqContext.hsCountry+"-"+reqContext.hsState+"-"+reqContext.highSchoolIdentifier+"-" +reqContext.studentIdentifier+"-"+reqContext.docType+"-"+uploadedFileName;
       uploadedFile.mv(uploadpath,function(err){
         if(err){
           console.log("File Upload Failed",uploadedFileName,err);
@@ -131,6 +138,7 @@ function saveToEth(reqContext)
       "headers": { "content-type": "application/json" },
       "url": "http://localhost:9000/api/ethblock",
       "body": JSON.stringify(reqContext)
+//    }, (error, response, body) => {
     }, (error, response, body) => {
     if(error) {
       console.log("Error while saving in Ethereum..." + error);

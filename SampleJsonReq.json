@@ -2,9 +2,9 @@
   "gradClass": "2025",
   "hsCountry": "United States",
   "hsState": "AL",
-  "highSchoolIdentifier": "11111",
-  "studentIdentifier": "2222",
+  "highSchoolIdentifier": "2025",
+  "studentIdentifier": "1111",
   "docType": "Report Card",
-  "fileLocation": "C:\\Users\\pavan\\IdeaProjects\\docValidator-RestAPI/uploads/2025-United States-AL-11111-2222-Report Card-student.txt.txt",
+  "fileLocation": "C:\\Users\\pavan\\IdeaProjects\\docValidator-RestAPI/uploads/2025-United States-AL-2025-1111-Report Card-student.txt.txt",
   "fileHash": "801745f1be584e8a62401e2abbfa663e59e172181c9ff15fc4d60ba5985cb46c"
 }

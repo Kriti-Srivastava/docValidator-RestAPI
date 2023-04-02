@@ -27,7 +27,6 @@ app.use(bodyParser.urlencoded({extended:false}));
 
 console.log("Server Started at port 5555..");
 
-/*======================MAIN==============================================*/
 app.post('/blockEntires', (req,res) => {
   console.log("============================================");
   _requestContext = null;
@@ -36,15 +35,45 @@ app.post('/blockEntires', (req,res) => {
         console.log("\n\nStep 1 Complete: File location: "+ JSON.stringify(reqContext));
           calculateHash(reqContext)
               .then((reqContext)=> {
-                console.log("\n\nStep 2 Complete: Calculate Hash: "+ JSON.stringify(reqContext));
-                requestContext = reqContext;  
+                console.log("\n\nStep 2 Complete: Calculate Hash: "+ reqContext.fileHash);
+                _requestContext = reqContext;
                 saveToEth(reqContext).then((msg) => {
                     console.log("\n\nStep 3  Added to Eth" + msg);
-                    // saveToMongo(reqContext).then((dbResponse) => {
-                    //   console.log("\n\nStep 4  Added to Mongo: " + dbResponse);
-                    //   res.setHeader('Content-Type', 'application/json');
-                    //   res.send(dbResponse);
-                    // })
+                      res.setHeader('Content-Type', 'application/json');
+                      res.send(msg);
+                })
+              })
+      })
+})
+
+app.post('/validateEntires', (req,res) => {
+  console.log("============================================");
+  _requestContext = null;
+  _validationResponse = {userHash: null,
+  blockchainHash: null,
+  result: null
+  };
+  saveFileToFileSys(req,res)
+      .then((reqContext) => {
+        console.log("\n\nStep 1 Complete: File location: "+ JSON.stringify(reqContext));
+          calculateHash(reqContext)
+              .then((reqContext)=> {
+                console.log("\n\nStep 2 Complete: Calculate Hash: "+ reqContext.fileHash);
+                _requestContext = reqContext;
+                getHashFromEth(reqContext).then((msg) => {
+                    console.log("\n\nStep 3  Added to Eth" + msg);
+                      _validationResponse.userHash = reqContext.fileHash;
+                      _validationResponse.blockchainHash = msg;
+
+                      if (reqContext.fileHash === msg){
+                        _validationResponse.result = 'Passed';
+                      }
+                      else {
+                      _validationResponse.result = 'Failed';
+                      }
+                      res.setHeader('Content-Type', 'application/json');
+                      res.send(_validationResponse);
+
                 })
               })
       })
@@ -100,7 +129,7 @@ function saveFileToFileSys(req,res)
           console.log("File stored to ...",reqContext.fileLocation);
           console.log("Leaving saveFileToFileSys...");
           resolve (reqContext);
-          res.send(uploadpath);
+//          res.send(uploadpath);
         }
       });
     }
@@ -130,15 +159,14 @@ function calculateHash(reqContext)
 
 }
 
-function saveToEth(reqContext)
-{
+function saveToEth(reqContext) {
+  console.log ("Before calling Eth API" + JSON.stringify(reqContext) );
   return new Promise ((resolve, reject) =>
   {
     Request.post({
       "headers": { "content-type": "application/json" },
       "url": "http://localhost:9000/api/ethblock",
       "body": JSON.stringify(reqContext)
-//    }, (error, response, body) => {
     }, (error, response, body) => {
     if(error) {
       console.log("Error while saving in Ethereum..." + error);
@@ -146,43 +174,39 @@ function saveToEth(reqContext)
     }
     else
     {
-        console.log("-------SUCCESS: Response from Eth:" + body);
-        resolve("-------SUCCESS: Response from Eth:" + body);
+        console.log("\n\nInside saveToEth:  Response from Eth:" + body);
+        resolve(reqContext);
     }
 
-  });
+  })
 
   })  
-
 }
 
-// function saveToMongo(reqContext)
-// {
-//   console.log("Inside saveToMongo. Context is" + reqContext);
-//   return new Promise((resolve, reject)=>{
-//     var allDocforDocId = [];
-//     let _reqContext = reqContext;
-//     delete _reqContext.fileHash;
-//     //------- Call REST API to save data in MongoDB.
-//     Request.post({
-//       "headers": { "content-type": "application/json" },
-//       "url": "http://localhost:8000/api/dbblock",
-//       "body": JSON.stringify(_reqContext)
-//     }, (error, response, body) => {
-//       if(error) {
-//           console.log(error);
-//           reject("error occured while saving in MongoDB");
-//         }
-//       else {
-//         //console.log("Response form DB Service -->" + JSON.stringify(response.body));
-//         resolve(response.body);
-//       }
-//   });
+function getHashFromEth(reqContext) {
+  console.log ("Inside getHashFromEth111111" + JSON.stringify(reqContext) );
+  return new Promise ((resolve, reject) =>
+  {
+    Request.post({
+      "headers": { "content-type": "application/json" },
+      "url": "http://localhost:9000/api/getBlockHash",
+      "body": JSON.stringify(reqContext)
+    }, (error, response, body) => {
+    if(error) {
+      console.log("Error while getHashFromEth in Ethereum..." + error);
+      reject("Error while getHashFromEth in Ethereum..." + error);
+    }
+    else
+    {
+        console.log("\n\nInside getHashFromEth:  Response from Eth:" + body);
+        resolve(body);
+    }
 
-//   })
-  
-// }
+  })
 
+  })
+
+}
 
 function getFileHashFromLocal(requestJson) {
     return new Promise((resolve, reject)=> {
